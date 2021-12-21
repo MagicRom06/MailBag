@@ -7,6 +7,7 @@ import * as SMTP from "./SMTP";
 import * as Contacts from "./contact";
 import {IContact} from "./Contacts";
 
+
 const app: Express = express();
 app.use(express.json());
 app.use("/",

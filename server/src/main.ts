@@ -1,11 +1,11 @@
 import path from "path";
 import express,
     {Express, NextFunction, Request, Response} from "express";
-//import {serverInfo} from "./ServerInfo";
-//import * as IMAP from "./IMAP";
-//import * as SMTP from "./SMTP";
-//import * as Contacts from "./contact";
-//import {IContact} from "./Contacts";
+import {serverInfo} from "./ServerInfo";
+import * as IMAP from "./IMAP";
+import * as SMTP from "./SMTP";
+import * as Contacts from "./contact";
+import {IContact} from "./Contacts";
 
 const app: Express = express();
 app.use(express.json());
@@ -18,3 +18,44 @@ app.use((inRequest: Request, inResponse: Response, inNext: NextFunction) => {
     inResponse.header("Access-Control-Allow-Headers", "Origin,X-Requested-With,Content-Type,Accept");
     inNext();
 });
+
+app.get("/mailboxes",
+    async (inRequest: Request, inResponse: Response) => {
+        try {
+            const imapWorker: IMAP.Worker = new IMAP.Worker(serverInfo);
+            const mailboxes: IMAP.IMailbox[] = await imapWorker.listMailBoxes();
+            inResponse.json(mailboxes);
+        } catch (inError) {
+            inResponse.send("error");
+        }
+    }
+)
+
+app.get("/mailboxes/:mailbox",
+    async (inRequest: Request, InResponse: Response) => {
+        try {
+            const imapWorker: IMAP.Worker = new IMAP.Worker(serverInfo);
+            const messages: IMAP.IMessage[] = await imapWorker.listMessages({
+                mailbox: inRequest.params.mailbox
+            });
+            InResponse.json(messages)
+        } catch (inError) {
+            InResponse.send("error");
+        }
+    }
+);
+
+app.get("/messages/:mailbox/:id", 
+    async (inRequest: Request, inResponse: Response) => {
+        try {
+            const imapWorker: IMAP.Worker = new IMAP.Worker(serverInfo);
+            const messageBody: string = await imapWorker.getMessageBody({
+                mailbox: inRequest.params.mailbox,
+                id: parseInt(inRequest.params.id, 10)
+            });
+            inResponse.send(messageBody)
+        } catch (inError) {
+            inResponse.send("error");
+        }
+    }
+);

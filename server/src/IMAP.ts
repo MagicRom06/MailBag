@@ -41,4 +41,44 @@ export class Worker {
         await client.connect();
         return client;
     }
+
+    public async listMailBoxes(): Promise<IMailbox[]> {
+        const client: any = await this.connectToServer();
+        const mailboxes: any = await client.listMailBoxes();
+        await client.close();
+        const finalMailBoxes: IMailbox[] = [];
+        const iterateChildren: Function = (inArray: any[]): void => {
+            inArray.forEach((inValue: any) => {
+                finalMailBoxes.push({
+                    name: inValue.name, path: inValue.path
+                });
+                iterateChildren(inValue.children);
+            });
+        };
+        iterateChildren(mailboxes.children);
+        return finalMailBoxes;
+    }
+
+    public async listMessages(inCallOptions: ICallOptions): Promise<IMessage[]> {
+        const client: any = await this.connectToServer();
+        const mailbox: any = await client.selectMailBox(inCallOptions.mailbox);
+        if (mailbox.exists === 0) {
+            await client.close();
+            return []
+        }
+        const messages: any[] = await client.listMessages(
+            inCallOptions.mailbox, "1:*", ["uid", "envelope"]
+        );
+        await client.close();
+        const finalMessages: IMessage[] = [];
+        messages.forEach((inValue: any) => {
+            finalMessages.push({
+                id: inValue.uid,
+                date: inValue.envelope.date,
+                from: inValue.envelope.from[0].adress,
+                subject: inValue.envelope.subject
+            });
+        });
+        return finalMessages;
+    }
 }

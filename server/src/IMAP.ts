@@ -1,4 +1,4 @@
-import ImapClient from "emailjs-imap-client";
+const imapClient = require('emailjs-imap-client');
 import { ParsedMail } from "mailparser";
 import { simpleParser } from "mailparser";
 import { IServerInfo } from "./ServerInfo";
@@ -27,7 +27,7 @@ export class Worker {
     }
 
     private async connectToServer(): Promise<any> {
-        const client: any = new ImapClient.default(
+        const client: any = new imapClient.default(
             Worker.serverInfo.imap.host,
             Worker.serverInfo.imap.port,
             {auth: Worker.serverInfo.imap.auth}
@@ -80,5 +80,16 @@ export class Worker {
             });
         });
         return finalMessages;
+    }
+
+    public async getMessageBody(inCallOptions: ICallOptions): Promise<any> {
+        const client: any = await this.connectToServer();
+        const messages: any[] = await client.listMessages(
+            inCallOptions.mailbox, inCallOptions.id,
+            ["body[]"], {byUid: true}
+        );
+        const parsed: ParsedMail = await simpleParser(messages[0]["body[]"]);
+        await client.close();
+        return parsed.text;
     }
 }

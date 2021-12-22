@@ -35,9 +35,8 @@ const path_1 = __importDefault(require("path"));
 const express_1 = __importDefault(require("express"));
 const ServerInfo_1 = require("./ServerInfo");
 const IMAP = __importStar(require("./IMAP"));
-//import * as SMTP from "./SMTP";
-//import * as Contacts from "./contact";
-//import {IContact} from "./Contacts";
+const SMTP = __importStar(require("./SMTP"));
+const Contacts = __importStar(require("./contact"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use("/", express_1.default.static(path_1.default.join(__dirname, "../../client/dist")));
@@ -52,6 +51,84 @@ app.get("/mailboxes", (inRequest, inResponse) => __awaiter(void 0, void 0, void 
         const imapWorker = new IMAP.Worker(ServerInfo_1.serverInfo);
         const mailboxes = yield imapWorker.listMailBoxes();
         inResponse.json(mailboxes);
+    }
+    catch (inError) {
+        inResponse.send("error");
+    }
+}));
+app.get("/mailboxes/:mailbox", (inRequest, InResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const imapWorker = new IMAP.Worker(ServerInfo_1.serverInfo);
+        const messages = yield imapWorker.listMessages({
+            mailbox: inRequest.params.mailbox
+        });
+        InResponse.json(messages);
+    }
+    catch (inError) {
+        InResponse.send("error");
+    }
+}));
+app.get("/messages/:mailbox/:id", (inRequest, inResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const imapWorker = new IMAP.Worker(ServerInfo_1.serverInfo);
+        const messageBody = yield imapWorker.getMessageBody({
+            mailbox: inRequest.params.mailbox,
+            id: parseInt(inRequest.params.id, 10)
+        });
+        inResponse.send(messageBody);
+    }
+    catch (inError) {
+        inResponse.send("error");
+    }
+}));
+app.delete("messages/:mailbox/:id", (inRequest, inResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const imapWorker = new IMAP.Worker(ServerInfo_1.serverInfo);
+        yield imapWorker.deleteMessage({
+            mailbox: inRequest.params.mailbox,
+            id: parseInt(inRequest.params.id, 10)
+        });
+        inResponse.send("OK");
+    }
+    catch (inError) {
+        inResponse.send("error");
+    }
+}));
+app.post("/messages", (inRequest, inResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const smtpWorker = new SMTP.Worker(ServerInfo_1.serverInfo);
+        yield smtpWorker.sendMessage(inRequest.body);
+        inResponse.send("ok");
+    }
+    catch (inError) {
+        inResponse.send("error");
+    }
+}));
+app.get("/contacts", (inRequest, inResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const contactsWorker = new Contacts.Worker();
+        const contacts = yield contactsWorker.listContacts();
+        inResponse.json(contacts);
+    }
+    catch (inError) {
+        inResponse.send("error");
+    }
+}));
+app.post("/contacts", (inRequest, inResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const contactsWorker = new Contacts.Worker();
+        const contact = yield contactsWorker.addContact(inRequest.body);
+        inResponse.json(contact);
+    }
+    catch (inError) {
+        inResponse.send("error");
+    }
+}));
+app.delete("/contacts/:id", (inRequest, inResponse) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const contactsWorker = new Contacts.Worker();
+        yield contactsWorker.deleteContact(inRequest.params.id);
+        inResponse.send("ok");
     }
     catch (inError) {
         inResponse.send("error");

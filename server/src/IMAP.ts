@@ -92,4 +92,12 @@ export class Worker {
         await client.close();
         return parsed.text;
     }
+
+    public async deleteMessage(inCallOptions: ICallOptions): Promise<any> {
+        const client: any = await this.connectToServer();
+        await client.deleteMessages(
+            inCallOptions.mailbox, inCallOptions.id, {byUid: true}
+        );
+        await client.close();
+    }
 }

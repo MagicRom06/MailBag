@@ -16,4 +16,18 @@ export class Worker {
             autoload: true
         });
     }
+
+    public listContacts(): Promise<IContact[]> {
+        return new Promise((inResolve, inReject) => {
+            this.db.find({ },
+                (inError: Error, inDocs: IContact[]) => {
+                    if (inError) {
+                        inReject(inError);
+                    } else {
+                        inResolve(inDocs);
+                    }
+                }
+            );
+        });
+    }
 }

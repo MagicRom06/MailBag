@@ -9,9 +9,8 @@ export interface IServerInfo {
     },
     imap: {
         host: string, port: number,
-        auth: {user: string, port: number}
+        auth: {user: string, pass: string}
     }
 }
-export let serverInfo: IServerInfo;
-const rawInfo: any = fs.readFileSync(path.join(__dirname, '../ServerInfo.json'));
-serverInfo = JSON.parse(rawInfo);
+const rawInfo: any = fs.readFileSync(path.join(__dirname, '../serverInfo.json'));
+export let serverInfo: IServerInfo = JSON.parse(rawInfo);

@@ -5,10 +5,11 @@ import {serverInfo} from "./ServerInfo";
 import * as IMAP from "./IMAP";
 import * as SMTP from "./SMTP";
 import * as Contacts from "./contact";
-import {IContact} from "./Contacts";
+import {IContact} from "./contact";
 
 
 const app: Express = express();
+app.listen(8080);
 app.use(express.json());
 app.use("/",
     express.static(path.join(__dirname, "../../client/dist"))

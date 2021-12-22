@@ -30,7 +30,7 @@ export class Worker {
         const client: any = new imapClient.default(
             Worker.serverInfo.imap.host,
             Worker.serverInfo.imap.port,
-            {auth: Worker.serverInfo.imap.auth}
+            {auth: Worker.serverInfo.imap.auth, useSecureTransport: true,}
         );
         client.logLevel = client.LOG_LEVEL_NONE;
         client.onerror = (inError: Error) => {
@@ -39,6 +39,7 @@ export class Worker {
             );
         };
         await client.connect();
+        console.log(client)
         return client;
     }
 

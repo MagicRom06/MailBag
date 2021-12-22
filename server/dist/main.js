@@ -38,6 +38,7 @@ const IMAP = __importStar(require("./IMAP"));
 const SMTP = __importStar(require("./SMTP"));
 const Contacts = __importStar(require("./contact"));
 const app = (0, express_1.default)();
+app.listen(8080);
 app.use(express_1.default.json());
 app.use("/", express_1.default.static(path_1.default.join(__dirname, "../../client/dist")));
 app.use((inRequest, inResponse, inNext) => {
